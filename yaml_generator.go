@@ -8,12 +8,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type Workflow struct {
-	// Define your workflow struct fields here
-	Name string
-	// Add other fields as needed
-}
-
 // Checks if a path exists on the filesystem
 func pathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
@@ -27,7 +21,7 @@ func pathExists(path string) (bool, error) {
 }
 
 // Generates YAML from a Workflow struct and writes it to a file
-func (wf *Workflow) generateYAML(filename string, overwrite bool) error {
+func (wf *Workflow) GenerateYAML(filename string, overwrite bool) error {
 	dirPath := ".github/workflows"
 
 	// Check if the directory exists, create it if not
@@ -41,7 +35,7 @@ func (wf *Workflow) generateYAML(filename string, overwrite bool) error {
 		}
 	}
 
-	// Check if file already exists in the directory and handle overwrite flag
+	// Check if file exists in the directory and handle overwrite flag
 	filePath := filepath.Join(dirPath, filename)
 	if exists, _ := pathExists(filePath); exists && !overwrite {
 		return fmt.Errorf("file '%s' already exists and overwrite is set to false; aborting", filename)

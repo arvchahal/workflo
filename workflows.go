@@ -1,29 +1,32 @@
 package githubactions
 
-type workflow struct {
-	name        string
-	description *string
-	jobs        []job
-	on          map[string]interface{}
+type Workflow struct {
+	Name        string
+	Description *string
+	Jobs        []Job
+	On          map[string]interface{}
 }
 
-type job struct {
-	name  string
-	on    string
-	steps []step
-	Env   map[string]string `yaml:",omitempty"`
+type Job struct {
+	Name   string
+	RunsOn string
+	Steps  []Step
+	Env    map[string]string `yaml:",omitempty"`
 }
-type step struct {
+
+type Step struct {
 	Name string
 	Uses string            `yaml:",omitempty"`
 	Run  string            `yaml:",omitempty"`
 	Env  map[string]string `yaml:",omitempty"`
 }
 
-func newWorkflow(name string) *workflow {
-	return &workflow{name: name, on: make(map[string]interface{}), jobs: []job{}}
+// NewWorkflow initializes a new Workflow
+func NewWorkflow(name string) *Workflow {
+	return &Workflow{Name: name, On: make(map[string]interface{}), Jobs: []Job{}}
 }
 
-func (wf *workflow) add_job(job job) {
-	wf.jobs = append(wf.jobs, job)
+// AddJob adds a job to the workflow
+func (wf *Workflow) AddJob(job Job) {
+	wf.Jobs = append(wf.Jobs, job)
 }
