@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/arvchahal/workflo/cli" // Replace with your actual module path
+	"workflo/cli"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 

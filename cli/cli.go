@@ -7,7 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/arvchahal/workflo/githubactions"
+	"workflo/githubactions"
 )
 
 type state int
@@ -36,12 +36,13 @@ func NewModel() model {
 	}
 
 	// Initialize the list component
-	l := list.New(items, list.NewDefaultDelegate(), 0, 0)
+	l := list.New(items, list.NewDefaultDelegate(), 50, 6)
 	l.Title = "What programming language is your project using?"
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.DisableQuitKeybindings()
 	l.SetShowHelp(false)
+	l.SetShowPagination(false)
 
 	return model{
 		state:    stateProjectType,
@@ -55,9 +56,10 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
 	switch m.state {
 	case stateProjectType:
-		var cmd tea.Cmd
 		m.list, cmd = m.list.Update(msg)
 
 		switch msg := msg.(type) {
@@ -84,7 +86,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 
 	case stateWorkflowName:
-		var cmd tea.Cmd
 		m.textInput, cmd = m.textInput.Update(msg)
 
 		switch msg := msg.(type) {
@@ -93,6 +94,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 				m.workflow.Name = m.textInput.Value()
 				m.state = stateFinalize
+				// Proceed to finalize or continue to next steps
 			case "ctrl+c", "q":
 				return m, tea.Quit
 			}
@@ -104,10 +106,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Generate the YAML file
 		err := m.workflow.GenerateYAML("ci-workflow.yml", false)
 		if err != nil {
-			m.workflow.Name = fmt.Sprintf("Error generating YAML: %v", err)
-		} else {
-			m.workflow.Name = "Workflow YAML generated successfully!"
+			return m, tea.Quit
 		}
+		fmt.Println("Workflow YAML generated successfully!")
 		return m, tea.Quit
 	}
 
@@ -124,7 +125,7 @@ func (m model) View() string {
 			m.textInput.View(),
 		)
 	case stateFinalize:
-		return m.workflow.Name + "\n"
+		return "Workflow generated successfully!\n"
 	default:
 		return "An unexpected error occurred.\n"
 	}

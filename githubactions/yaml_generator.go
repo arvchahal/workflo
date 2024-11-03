@@ -22,10 +22,12 @@ func pathExists(path string) (bool, error) {
 
 // Generates YAML from a Workflow struct and writes it to a file
 func (wf *Workflow) GenerateYAML(filename string, overwrite bool) error {
-	dirPath := "../.github/workflows"
+	dirPath := ".github/workflows"
 
 	// Check if the directory exists, create it if not
+	fmt.Printf(os.Getwd())
 	dirExists, err := pathExists(dirPath)
+	fmt.Println(dirExists)
 	if err != nil {
 		return fmt.Errorf("error checking directory: %v", err)
 	}
@@ -34,7 +36,7 @@ func (wf *Workflow) GenerateYAML(filename string, overwrite bool) error {
 			return fmt.Errorf("error creating github workflows directory: %v", err)
 		}
 	}
-
+	fmt.Println(dirExists)
 	// Check if file exists in the directory and handle overwrite flag
 	filePath := filepath.Join(dirPath, filename)
 	if exists, _ := pathExists(filePath); exists && !overwrite {
