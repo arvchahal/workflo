@@ -1,4 +1,6 @@
-#The CLI built using the bubbletea framework
+#
+The CLI built using the bubbletea framework
+#
 
 ###
 This is the directory storing the ransition between states for the CLI and the logic involved 
