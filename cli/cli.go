@@ -32,7 +32,7 @@ func NewModel() model {
 		item("Go"),
 		item("Python"),
 		item("Node.js"),
-		item("Other"),
+		item("None of the Above (default Yaml config)"),
 	}
 
 	// Initialize the list component
@@ -42,7 +42,7 @@ func NewModel() model {
 	l.SetFilteringEnabled(false)
 	l.DisableQuitKeybindings()
 	l.SetShowHelp(false)
-	l.SetShowPagination(false)
+	l.SetShowPagination(true)
 
 	return model{
 		state:    stateProjectType,
