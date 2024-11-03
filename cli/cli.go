@@ -1,3 +1,4 @@
+// Package cli provides a Bubble Tea model with a simple list component.
 package cli
 
 import (
@@ -6,25 +7,9 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-
-	"workflo/githubactions"
 )
 
-var (
-	titleStyle         = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FF5733"))
-	selectedTitleStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#33FF57"))
-	descriptionStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("#AAAAAA"))
-)
-
-func genCustomList() list.DefaultDelegate {
-	delegate := list.NewDefaultDelegate()
-	delegate.Styles.SelectedTitle = selectedTitleStyle
-	delegate.Styles.NormalTitle = titleStyle
-	delegate.Styles.NormalDesc = descriptionStyle
-	return delegate
-}
-
+// Define the application states
 type state int
 
 const (
@@ -33,17 +18,15 @@ const (
 	stateFinalize
 )
 
+// Define the model struct
 type model struct {
-	state       state
-	list        list.Model
-	textInput   textinput.Model
-	workflow    *githubactions.Workflow
-	projectType string
-	cursor      int
+	state     state
+	list      list.Model
+	textInput textinput.Model
 }
 
+// NewModel initializes the model with a list and text input component
 func NewModel() model {
-	// Define choices for project type
 	items := []list.Item{
 		item("Go"),
 		item("Python"),
@@ -51,90 +34,67 @@ func NewModel() model {
 		item("None of the Above (default Yaml config)"),
 	}
 
-	// Initialize the list component
-	//delegate := genCustomList()
-	l := list.New(items, list.NewDefaultDelegate(), 100, 15)
-	l.Title = "What programming language is your project using?"
+	// Initialize the list with default styles
+	l := list.New(items, list.NewDefaultDelegate(), 50, 15)
+	l.Title = "Select the programming language:"
 	l.SetShowStatusBar(false)
-	l.SetFilteringEnabled(false)
-	l.SetShowPagination(false)
-	l.DisableQuitKeybindings()
 	l.SetShowHelp(false)
-	l.SetShowPagination(false)
+
+	// Initialize the text input
 	ti := textinput.New()
-	ti.Cursor.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("")).Background(lipgloss.Color("")) // Invisible cursor
-	ti.Blur()                                                                                           // Unfocus to hide cursor initially
+	ti.Placeholder = "Enter a name for this workflow"
+	ti.CharLimit = 64
+	ti.Width = 40
+
 	return model{
-		state:    stateProjectType,
-		list:     l,
-		workflow: githubactions.NewWorkflow(""),
+		state:     stateProjectType,
+		list:      l,
+		textInput: ti,
 	}
 }
 
+// Init initializes the program
 func (m model) Init() tea.Cmd {
 	return nil
 }
 
+// Update handles messages and updates the model state
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-
 	switch m.state {
 	case stateProjectType:
 		m.list, cmd = m.list.Update(msg)
-
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
 				selectedItem := m.list.SelectedItem()
 				if selectedItem != nil {
-					m.projectType = selectedItem.FilterValue()
 					m.state = stateWorkflowName
-
-					// Initialize text input for workflow name
-					m.textInput = textinput.New()
-					m.textInput.Placeholder = "Enter a name for this workflow"
 					m.textInput.Focus()
-					m.textInput.CharLimit = 64
-					m.textInput.Width = 40
 				}
 			case "ctrl+c", "q":
 				return m, tea.Quit
 			}
 		}
-
-		return m, cmd
-
 	case stateWorkflowName:
 		m.textInput, cmd = m.textInput.Update(msg)
-
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
-				m.workflow.Name = m.textInput.Value()
 				m.state = stateFinalize
-				// Proceed to finalize or continue to next steps
 			case "ctrl+c", "q":
 				return m, tea.Quit
 			}
 		}
-
-		return m, cmd
-
 	case stateFinalize:
-		// Generate the YAML file
-		err := m.workflow.GenerateYAML("ci-workflow.yml", false)
-		if err != nil {
-			return m, tea.Quit
-		}
-		fmt.Println("Workflow YAML generated successfully!")
 		return m, tea.Quit
 	}
-
-	return m, nil
+	return m, cmd
 }
 
+// View renders the UI based on the current state
 func (m model) View() string {
 	switch m.state {
 	case stateProjectType:
@@ -145,9 +105,9 @@ func (m model) View() string {
 			m.textInput.View(),
 		)
 	case stateFinalize:
-		return "Workflow generated successfully!\n"
+		return "Workflow setup completed! Press Ctrl+C to exit."
 	default:
-		return "An unexpected error occurred.\n"
+		return "An unexpected error occurred."
 	}
 }
 
