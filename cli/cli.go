@@ -6,9 +6,24 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
 	"workflo/githubactions"
 )
+
+var (
+	titleStyle         = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FF5733"))
+	selectedTitleStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#33FF57"))
+	descriptionStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("#AAAAAA"))
+)
+
+func genCustomList() list.DefaultDelegate {
+	delegate := list.NewDefaultDelegate()
+	delegate.Styles.SelectedTitle = selectedTitleStyle
+	delegate.Styles.NormalTitle = titleStyle
+	delegate.Styles.NormalDesc = descriptionStyle
+	return delegate
+}
 
 type state int
 
@@ -24,6 +39,7 @@ type model struct {
 	textInput   textinput.Model
 	workflow    *githubactions.Workflow
 	projectType string
+	cursor      int
 }
 
 func NewModel() model {
@@ -36,14 +52,18 @@ func NewModel() model {
 	}
 
 	// Initialize the list component
-	l := list.New(items, list.NewDefaultDelegate(), 50, 6)
+	//delegate := genCustomList()
+	l := list.New(items, list.NewDefaultDelegate(), 100, 15)
 	l.Title = "What programming language is your project using?"
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
+	l.SetShowPagination(false)
 	l.DisableQuitKeybindings()
 	l.SetShowHelp(false)
-	l.SetShowPagination(true)
-
+	l.SetShowPagination(false)
+	ti := textinput.New()
+	ti.Cursor.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("")).Background(lipgloss.Color("")) // Invisible cursor
+	ti.Blur()                                                                                           // Unfocus to hide cursor initially
 	return model{
 		state:    stateProjectType,
 		list:     l,
