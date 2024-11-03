@@ -50,18 +50,24 @@ func NewModel() model {
 	cron.SetShowStatusBar(false)
 	cron.SetShowHelp(false)
 
-	// Initialize text input
+	// Initialize text inputs
 	ti := textinput.New()
 	ti.Placeholder = "Enter a name for this workflow"
 	ti.CharLimit = 64
 	ti.Width = 40
+
+	ro := textinput.New()
+	ro.Placeholder = "Runner Name"
+	ro.CharLimit = 64
+	ro.Width = 50
 
 	return model{
 		state:          stateWorkflowName,
 		supportedSched: schedule,
 		cronFrequency:  cron,
 		supportedCloud: cloud,
-		textInput:      ti,
+		textInput:      ti, //name for the yaml file
+		runsOnInput:    ro, //runner if needed "" for "ubuntu-latest"
 	}
 }
 

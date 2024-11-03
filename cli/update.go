@@ -15,6 +15,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.textInput, cmd = m.textInput.Update(msg)
 		return m.handleWorkflowNameState(msg, cmd)
 
+	case stateRunner:
+		m.runsOnInput.Focus()
+		m.runsOnInput, cmd = m.runsOnInput.Update(msg)
+		return m.handleRunnerState(msg, cmd)
+
 	case stateSchedule:
 		m.supportedSched, cmd = m.supportedSched.Update(msg)
 		return m.handleScheduleState(msg, cmd)
@@ -45,6 +50,23 @@ func (m model) handleWorkflowNameState(msg tea.Msg, cmd tea.Cmd) (tea.Model, tea
 		case "enter":
 			m.workflowName = m.textInput.Value()
 			m.textInput.Reset()
+			m.state = stateRunner
+			return m, textinput.Blink
+		case "ctrl+c", "q":
+			return m, tea.Quit
+		}
+	}
+	return m, cmd
+}
+
+// handleRunnerState processes input for the Runner state
+func (m model) handleRunnerState(msg tea.Msg, cmd tea.Cmd) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter":
+			m.runsOn = m.runsOnInput.Value()
+			m.runsOnInput.Reset()
 			m.state = stateSchedule
 			return m, textinput.Blink
 		case "ctrl+c", "q":
