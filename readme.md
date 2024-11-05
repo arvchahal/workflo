@@ -11,7 +11,7 @@
 - Simple and intuitive CLI
 - Language support: Go, Python, Node
 - Allows you to configure cloud credentials for AWS, Azure, and GCP
-- Configure GitHub secrets from the command line 
+- Configure GitHub secrets from the CLI
 - Autoinitialize a .github/workflows directory if it is not already there
 - Coming Soon:
     - More language support
