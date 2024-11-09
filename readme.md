@@ -1,5 +1,5 @@
 ## workflo
-### Tired of writing GitHub Actions manually? So are we.
+### Tired of writing GitHub Actions manually?
 
 ### Workflo is a powerful CLI tool built with the Bubble Tea framework by Charmbracelet. This Go-based CLI simplifies the creation of GitHub Action files by automatically generating them with essential boilerplate actions.
 
@@ -11,7 +11,7 @@
 - Simple and intuitive CLI
 - Language support: Go, Python, Node
 - Allows you to configure cloud credentials for AWS, Azure, and GCP
-- Configure GitHub secrets from the command line 
+- Configure GitHub secrets from the CLI
 - Autoinitialize a .github/workflows directory if it is not already there
 - Coming Soon:
     - More language support
