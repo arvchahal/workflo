@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -20,14 +21,41 @@ func pathExists(path string) (bool, error) {
 	return false, err
 }
 
+// parseSteps converts a YAML string into a slice of Step structs
+func parseSteps(stepsYaml string) []Step {
+	var steps []Step
+	// Split the string by newlines and then parse each individual step
+	for _, stepYaml := range strings.Split(stepsYaml, "\n- ") {
+		if stepYaml == "" {
+			continue
+		}
+
+		// Prepend the dash to each step to maintain valid YAML formatting
+		stepYaml = "- " + stepYaml
+		var step Step
+		if err := yaml.Unmarshal([]byte(stepYaml), &step); err == nil {
+			steps = append(steps, step)
+		}
+	}
+	return steps
+}
+
+/* func buildWf(actionName string, schedule []string, jobs []string  ) *Workflow{
+	sdcheudle_type := scheduel[0]
+	cron_schedule :=nil
+	if len(schedule)>1:
+		cron_schedule = schedule[1]
+	for job in jobs:
+
+
+ }
+*/
 // Generates YAML from a Workflow struct and writes it to a file
 func (wf *Workflow) GenerateYAML(filename string, overwrite bool) error {
 	dirPath := ".github/workflows"
 
 	// Check if the directory exists, create it if not
-	fmt.Printf(os.Getwd())
 	dirExists, err := pathExists(dirPath)
-	fmt.Println(dirExists)
 	if err != nil {
 		return fmt.Errorf("error checking directory: %v", err)
 	}
@@ -36,7 +64,6 @@ func (wf *Workflow) GenerateYAML(filename string, overwrite bool) error {
 			return fmt.Errorf("error creating github workflows directory: %v", err)
 		}
 	}
-	fmt.Println(dirExists)
 	// Check if file exists in the directory and handle overwrite flag
 	filePath := filepath.Join(dirPath, filename)
 	if exists, _ := pathExists(filePath); exists && !overwrite {

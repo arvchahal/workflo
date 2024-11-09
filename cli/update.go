@@ -2,6 +2,8 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -28,6 +30,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.cronFrequency, cmd = m.cronFrequency.Update(msg)
 		return m.handleCronFrequencyState(msg, cmd)
 
+	case stateLanguage:
+		m.supportedLang, cmd = m.supportedLang.Update(msg)
+		return m.handleLanguageState(msg, cmd)
+
 	case stateCloudProvider:
 		m.supportedCloud, cmd = m.supportedCloud.Update(msg)
 		return m.handleCloudProviderState(msg, cmd)
@@ -38,6 +44,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case stateComplete:
 		return m.handleCompleteState(msg, cmd)
+	}
+	return m, cmd
+}
+
+// handleCompleteState handles the final state where the program exits
+func (m model) handleCompleteState(msg tea.Msg, cmd tea.Cmd) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter", "ctrl+c", "q":
+			fmt.Println("Workflow setup completed. Exiting...")
+			return m, tea.Quit
+		}
 	}
 	return m, cmd
 }
@@ -88,7 +107,7 @@ func (m model) handleScheduleState(msg tea.Msg, cmd tea.Cmd) (tea.Model, tea.Cmd
 				if m.schedule == "Cron Schedule" {
 					m.state = stateCronFrequency
 				} else {
-					m.state = stateCloudProvider
+					m.state = stateLanguage
 				}
 			}
 		case "ctrl+c", "q":
@@ -108,17 +127,51 @@ func (m model) handleCronFrequencyState(msg tea.Msg, cmd tea.Cmd) (tea.Model, te
 			if selectedFrequency != nil {
 				frequency := selectedFrequency.FilterValue()
 				if frequency == "Other (Enter custom cron)" {
-					// Move to custom cron input
 					m.textInput.Placeholder = "Enter custom cron schedule"
 					m.textInput.SetValue("")
 					m.textInput.Focus()
 					m.state = stateCustomCron
 					return m, textinput.Blink
 				} else {
-					// Set predefined cron and move to cloud provider
 					m.schedule = frequency
-					m.state = stateCloudProvider
+					m.state = stateLanguage
 				}
+			}
+		case "ctrl+c", "q":
+			return m, tea.Quit
+		}
+	}
+	return m, cmd
+}
+
+// handleCustomCronState processes input for the Custom Cron state
+func (m model) handleCustomCronState(msg tea.Msg, cmd tea.Cmd) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter":
+			// Set the custom cron value from user input
+			m.customCron = m.textInput.Value()
+			m.schedule = m.customCron // Use custom cron as the schedule
+			m.state = stateLanguage   // Transition to stateLanguage
+			return m, textinput.Blink
+		case "ctrl+c", "q":
+			return m, tea.Quit
+		}
+	}
+	return m, cmd
+}
+
+// handleLanguageState processes input for the Language state
+func (m model) handleLanguageState(msg tea.Msg, cmd tea.Cmd) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter":
+			selectedLang := m.supportedLang.SelectedItem()
+			if selectedLang != nil {
+				m.language = selectedLang.FilterValue()
+				m.state = stateCloudProvider
 			}
 		case "ctrl+c", "q":
 			return m, tea.Quit
@@ -137,38 +190,10 @@ func (m model) handleCloudProviderState(msg tea.Msg, cmd tea.Cmd) (tea.Model, te
 			if selectedCloud != nil {
 				m.cloud = selectedCloud.FilterValue()
 				m.state = stateComplete
+			} else {
+				m.cloud = ""
 			}
 		case "ctrl+c", "q":
-			return m, tea.Quit
-		}
-	}
-	return m, cmd
-}
-
-// handleCustomCronState processes input for the Custom Cron state
-func (m model) handleCustomCronState(msg tea.Msg, cmd tea.Cmd) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter":
-			m.customCron = m.textInput.Value()
-			m.schedule = m.customCron
-			m.state = stateCloudProvider
-			return m, nil
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		}
-	}
-	return m, cmd
-}
-
-// handleCompleteState handles the final state where the program exits
-func (m model) handleCompleteState(msg tea.Msg, cmd tea.Cmd) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter", "ctrl+c", "q":
-			// Quit the program
 			return m, tea.Quit
 		}
 	}

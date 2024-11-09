@@ -11,9 +11,10 @@ type state int
 
 const (
 	stateWorkflowName state = iota
-	stateRunner             // Added this state
+	stateRunner
 	stateSchedule
 	stateCronFrequency
+	stateLanguage
 	stateCloudProvider
 	stateCustomCron
 	stateComplete
@@ -25,13 +26,15 @@ type model struct {
 	supportedSched list.Model
 	supportedCloud list.Model
 	cronFrequency  list.Model
+	supportedLang  list.Model // Language selection component
 	textInput      textinput.Model
-	runsOnInput    textinput.Model // Changed RunsOn to textinput.Model for consistency
+	runsOnInput    textinput.Model
 	workflowName   string
 	schedule       string
 	cloud          string
+	language       string
 	customCron     string
-	runsOn         string // Changed RunsOn to lowercase for the actual runner string
+	runsOn         string
 }
 
 // item struct implementing list.Item interface

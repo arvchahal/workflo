@@ -12,16 +12,14 @@ func (m model) View() string {
 		return fmt.Sprintf("Enter a specific Runner for the workflow file (leave empty for default: ubuntu-latest): \n\n%s\n\n(Press Enter to continue)", m.runsOnInput.View())
 	case stateSchedule:
 		return m.supportedSched.View()
-
 	case stateCronFrequency:
 		return m.cronFrequency.View()
-
+	case stateLanguage:
+		return m.supportedLang.View()
 	case stateCloudProvider:
 		return m.supportedCloud.View()
-
 	case stateCustomCron:
 		return fmt.Sprintf("Enter custom cron schedule:\n\n%s\n\n(Press Enter to continue)", m.textInput.View())
-
 	case stateComplete:
 		return "Workflow setup completed! Press Enter or Ctrl+C to exit."
 	default:

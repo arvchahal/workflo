@@ -17,6 +17,19 @@ func NewModel() model {
 		item("Cron Schedule"),
 	}
 
+	// Supported programming languages
+	languages := []list.Item{
+		item("Go"),
+		item("Python"),
+		item("Node.js"),
+		item("Java"),
+	}
+
+	lang := list.New(languages, list.NewDefaultDelegate(), 50, 15)
+	lang.Title = "Select a programming language:"
+	lang.SetShowStatusBar(false)
+	lang.SetShowHelp(false)
+
 	// Cron frequency options if "Cron Schedule" is selected
 	cronOptions := []list.Item{
 		item("Once a day"),
@@ -66,8 +79,9 @@ func NewModel() model {
 		supportedSched: schedule,
 		cronFrequency:  cron,
 		supportedCloud: cloud,
-		textInput:      ti, //name for the yaml file
-		runsOnInput:    ro, //runner if needed "" for "ubuntu-latest"
+		supportedLang:  lang, // Language list component
+		textInput:      ti,
+		runsOnInput:    ro,
 	}
 }
 
