@@ -22,7 +22,7 @@ func pathExists(path string) (bool, error) {
 }
 
 // parseSteps converts a YAML string into a slice of Step structs
-func parseSteps(stepsYaml string) []Step {
+func ParseSteps(stepsYaml string) []Step {
 	var steps []Step
 	// Split the string by newlines and then parse each individual step
 	for _, stepYaml := range strings.Split(stepsYaml, "\n- ") {
@@ -64,6 +64,7 @@ func (wf *Workflow) GenerateYAML(filename string, overwrite bool) error {
 			return fmt.Errorf("error creating github workflows directory: %v", err)
 		}
 	}
+
 	// Check if file exists in the directory and handle overwrite flag
 	filePath := filepath.Join(dirPath, filename)
 	if exists, _ := pathExists(filePath); exists && !overwrite {
@@ -76,8 +77,11 @@ func (wf *Workflow) GenerateYAML(filename string, overwrite bool) error {
 		return fmt.Errorf("error marshaling YAML: %v", err)
 	}
 
-	// Write the YAML data to the file
-	if err := os.WriteFile(filePath, data, 0644); err != nil {
+	// Replace `"on":` with `on:`
+	yamlString := strings.Replace(string(data), `"on":`, "on:", 1)
+
+	// Write the corrected YAML data to the file
+	if err := os.WriteFile(filePath, []byte(yamlString), 0644); err != nil {
 		return fmt.Errorf("error writing YAML file: %v", err)
 	}
 

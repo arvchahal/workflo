@@ -1,24 +1,26 @@
+// githubactions/workflow.go
+
 package githubactions
 
 type Workflow struct {
-	Name        string
-	Description *string
-	On          map[string]interface{}
-	Jobs        map[string]Job
+	Name        string                 `yaml:"name"`
+	Description *string                `yaml:"description,omitempty"`
+	On          map[string]interface{} `yaml:"on"`
+	Jobs        map[string]Job         `yaml:"jobs"`
 }
 
 type Job struct {
-	RunsOn string
-	Steps  []Step
-	Env    map[string]string `yaml:",omitempty"`
+	RunsOn string            `yaml:"runs-on"`
+	Steps  []Step            `yaml:"steps"`
+	Env    map[string]string `yaml:"env,omitempty"`
 }
 
 type Step struct {
-	Name string            `yaml:",omitempty"`
-	Uses string            `yaml:",omitempty"`
-	Run  string            `yaml:",omitempty"`
-	Env  map[string]string `yaml:",omitempty"`
-	With map[string]string `yaml:",omitempty"`
+	Name string            `yaml:"name,omitempty"`
+	Uses string            `yaml:"uses,omitempty"`
+	Run  string            `yaml:"run,omitempty"`
+	Env  map[string]string `yaml:"env,omitempty"`
+	With map[string]string `yaml:"with,omitempty"`
 }
 
 // NewWorkflow initializes a new Workflow

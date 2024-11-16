@@ -3,6 +3,7 @@ package cli
 
 import (
 	"fmt"
+	"workflo/githubactions"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -48,17 +49,90 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-// handleCompleteState handles the final state where the program exits
+// handleCompleteState handles the final state where the program exits and generates the YAML file.
 func (m model) handleCompleteState(msg tea.Msg, cmd tea.Cmd) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter", "ctrl+c", "q":
-			fmt.Println("Workflow setup completed. Exiting...")
+			// Initialize the workflow with the collected inputs
+			workflow := githubactions.NewWorkflow(m.workflowName)
+
+			// Map user-friendly names to valid GitHub Actions event names
+			eventName := ""
+			switch m.schedule {
+			case "On dispatch":
+				eventName = "workflow_dispatch"
+				workflow.On[eventName] = map[string]interface{}{}
+			case "On Pull":
+				eventName = "pull_request"
+				workflow.On[eventName] = map[string]interface{}{
+					"branches": []string{"main"},
+				}
+			case "On Push":
+				eventName = "push"
+				workflow.On[eventName] = map[string]interface{}{
+					"branches": []string{"main"},
+				}
+			case "Cron Schedule":
+				eventName = "schedule"
+				cronExpression := m.customCron
+				if cronExpression == "" {
+					cronExpression = getCronExpression(m.cronFrequency.SelectedItem().FilterValue())
+				}
+				workflow.On[eventName] = []map[string]string{
+					{"cron": cronExpression},
+				}
+			default:
+				fmt.Println("Invalid schedule type selected.")
+				return m, tea.Quit
+			}
+
+			// Check for empty `runsOn` and default to `ubuntu-latest`
+			if m.runsOn == "" {
+				m.runsOn = "ubuntu-latest"
+			}
+
+			// Generate steps for the job based on language and cloud provider
+			stepsYaml := githubactions.GetSkeleton(m.language, m.cloud, true)
+			steps := githubactions.ParseSteps(stepsYaml)
+
+			// Create the job with runner and steps, then add to workflow
+			job := githubactions.Job{
+				RunsOn: m.runsOn,
+				Steps:  steps,
+			}
+			workflow.AddJob("build", job)
+
+			// Generate the YAML file, handling any errors
+			err := workflow.GenerateYAML("workflow.yml", true)
+			if err != nil {
+				fmt.Printf("Error generating workflow YAML: %v\n", err)
+			} else {
+				fmt.Println("Workflow YAML generated successfully.")
+			}
+
+			// Exit the program
 			return m, tea.Quit
 		}
 	}
 	return m, cmd
+}
+
+// Helper function to map cron frequency to cron expressions
+func getCronExpression(frequency string) string {
+	switch frequency {
+	case "Once a day":
+		return "0 0 * * *"
+	case "Once a week":
+		return "0 0 * * 0"
+	case "Once a month":
+		return "0 0 1 * *"
+	case "Once a year":
+		return "0 0 1 1 *"
+	default:
+		return "0 0 * * *" // Default to once a day
+	}
 }
 
 // handleWorkflowNameState processes input for the Workflow Name state
