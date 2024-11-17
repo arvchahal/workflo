@@ -14,27 +14,71 @@ const (
 	stateRunner
 	stateSchedule
 	stateCronFrequency
-	stateLanguage
-	stateCloudProvider
 	stateCustomCron
+	stateLanguage
+	stateGitCheckoutOption
+	stateGitBranchSelection
+	stateCloudProvider
+	stateConfigureAWSCredentials
+	stateConfigureAWSAccessKeyID
+	stateConfigureAWSSecretAccessKey
+	stateConfigureAWSRegion
+	stateConfigureAzureCredentials
+	stateConfigureAzureClientID
+	stateConfigureAzureClientSecret
+	stateConfigureAzureTenantID
+	stateConfigureAzureSubscriptionID
+	stateConfigureGCPCredentials
+	stateConfigureGCPServiceAccountKey
+	stateConfigureGCPProjectID
+	stateConfigureSecretsOption
+	stateGitHubUsername
+	stateGitHubRepoName
+	stateGitHubToken
 	stateComplete
 )
 
 // Model struct to store the state and components
 type model struct {
-	state          state
-	supportedSched list.Model
-	supportedCloud list.Model
-	cronFrequency  list.Model
-	supportedLang  list.Model // Language selection component
-	textInput      textinput.Model
-	runsOnInput    textinput.Model
-	workflowName   string
-	schedule       string
-	cloud          string
-	language       string
-	customCron     string
-	runsOn         string
+	state                     state
+	supportedSched            list.Model
+	supportedCloud            list.Model
+	cronFrequency             list.Model
+	supportedLang             list.Model
+	gitCheckoutOption         list.Model
+	configureSecretsOption    list.Model
+	textInput                 textinput.Model
+	runsOnInput               textinput.Model
+	gitBranchInput            textinput.Model
+	githubUsernameInput       textinput.Model
+	githubRepoNameInput       textinput.Model
+	githubTokenInput          textinput.Model
+	awsAccessKeyIDInput       textinput.Model
+	awsSecretAccessKeyInput   textinput.Model
+	awsRegionInput            textinput.Model
+	azureClientIDInput        textinput.Model
+	azureClientSecretInput    textinput.Model
+	azureTenantIDInput        textinput.Model
+	azureSubscriptionIDInput  textinput.Model
+	gcpServiceAccountKeyInput textinput.Model
+	gcpProjectIDInput         textinput.Model
+	workflowName              string
+	workflowNameUpper         string
+	schedule                  string
+	cloud                     string
+	language                  string
+	awsRegion                 string
+	customCron                string
+	runsOn                    string
+	gitCheckout               bool
+	gitBranch                 string
+	awsSecrets                map[string]string
+	azureSecrets              map[string]string
+	gcpSecrets                map[string]string
+	configureSecrets          bool
+	githubUsername            string
+	githubRepoName            string
+	githubToken               string
 }
 
 // item struct implementing list.Item interface
