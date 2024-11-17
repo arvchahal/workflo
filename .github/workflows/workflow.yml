@@ -1,7 +1,17 @@
-name: kk
+name: hello
 on:
   workflow_dispatch: {}
 jobs:
   build:
-    runs-on: k
-    steps: []
+    runs-on: none
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: master
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.HELLO_AWS_ACCESS_KEY_ID }}
+        aws-region: ${{ secrets.HELLO_AWS_REGION }}
+        aws-secret-access-key: ${{ secrets.HELLO_AWS_SECRET_ACCESS_KEY }}
