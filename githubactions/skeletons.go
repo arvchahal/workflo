@@ -1,96 +1,83 @@
 package githubactions
 
-// import "fmt"
+import "fmt"
 
 // Basic reusable steps for common GitHub Actions workflows
 var BasicSteps = map[string]string{
-	"checkout": `
-- name: Check out the code
-  uses: actions/checkout@v2`,
-
-	"setup-node": `
-- name: Set up Node.js
-  uses: actions/setup-node@v2
-  with:
-    node-version: '16'`,
-
-	"setup-python": `
-- name: Set up Python
-  uses: actions/setup-python@v2
-  with:
-    python-version: '3.x'`, //latest stable release
-
-	"setup-go": `
-- name: Set up Go
-  uses: actions/setup-go@v2
-  with:
-    go-version: '^1.15'`,
+	//	"checkout": `
+	//   - name: Check out the code
+	//     uses: actions/checkout@v2`,
 }
 
 // Language-specific setup steps
 var LanguageSkeletons = map[string]string{
 	"Go": `
+	- name: Set up Go
+  uses: actions/setup-go@v2
+  with:
+    go-version: '^1.15'
 - run: go build -v ./...
 - run: go test -v ./...`,
 
 	"Python": `
+	- name: Set up Python
+ uses: actions/setup-python@v2
+  with:
+    python-version: '3.x'
 - run: pip install -r requirements.txt
 - run: pytest`,
 
 	"Node.js": `
+	- name: Set up Node.js
+ uses: actions/setup-node@v2
+  with:
+    node-version: '16'
 - run: npm install
 - run: npm test`,
 }
 
-// Cloud provider-specific setup steps, including SSO configurations
+// Cloud provider-specific setup steps
 var CloudProviderSkeletons = map[string]string{
 	"AWS": `
-- name: Configure AWS SSO credentials
+- name: Configure AWS Credentials
   uses: aws-actions/configure-aws-credentials@v1
   with:
-    role-to-assume: arn:aws:iam::123456789012:role/SSOReadOnly
-    aws-region: us-west-2`,
+    aws-access-key-id: ${{ secrets.%[1]s_AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.%[1]s_AWS_SECRET_ACCESS_KEY }}
+    aws-region: ${{ secrets.%[1]s_AWS_REGION }}`,
 
 	"Azure": `
 - name: Azure Login
   uses: azure/login@v1
   with:
-    creds: ${{ secrets.AZURE_CREDENTIALS }}`,
+    creds: ${{ secrets.%[1]s_AZURE_CREDENTIALS }}`,
 
 	"GCP": `
 - name: Authenticate to Google Cloud
-  uses: google-github-actions/auth@v1
+  uses: google-github-actions/setup-gcloud@v1
   with:
-    credentials_json: ${{ secrets.GCP_CREDENTIALS }}`,
-
-	"GCP-Workload": `
-- name: Authenticate to Google Cloud with Workload Identity Federation
-  uses: google-github-actions/auth@v1
-  with:
-    workload_identity_provider: "projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider"
-    service_account: "my-service-account@my-project.iam.gserviceaccount.com"`,
+    service_account_key: ${{ secrets.%[1]s_GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+    project_id: %[2]s`,
 }
 
-// GetSkeleton generates the GitHub Actions workflow based on selected language, cloud provider, and optional setup steps
-func GetSkeleton(language, cloudProvider string, includeSSO bool) string {
-	// Start with basic steps like checkout
-	action := BasicSteps["checkout"] + "\n"
+// GetSkeleton generates the steps based on selected language and cloud provider
+func GetSkeleton(language, cloudProvider, workflowNameUpper string, cloudParam string) string {
+	action := ""
 
 	// Add language-specific setup if available
 	if langSteps, ok := LanguageSkeletons[language]; ok {
 		action += langSteps + "\n"
 	}
 
-	// Add cloud provider-specific setup, including SSO where applicable
+	// Add cloud provider-specific setup if available
 	if cloudSteps, ok := CloudProviderSkeletons[cloudProvider]; ok {
+		switch cloudProvider {
+		case "AWS", "GCP":
+			cloudSteps = fmt.Sprintf(cloudSteps, workflowNameUpper, cloudParam)
+		case "Azure":
+			cloudSteps = fmt.Sprintf(cloudSteps, workflowNameUpper)
+		}
 		action += cloudSteps + "\n"
-	}
-
-	// Optionally, include additional setup steps based on selected options
-	if includeSSO && cloudProvider == "GCP" {
-		action += CloudProviderSkeletons["GCP-Workload"] + "\n"
-	} else if includeSSO && cloudProvider == "AWS" {
-		action += CloudProviderSkeletons["AWS"] + "\n"
 	}
 
 	return action

@@ -24,32 +24,23 @@ func pathExists(path string) (bool, error) {
 // parseSteps converts a YAML string into a slice of Step structs
 func ParseSteps(stepsYaml string) []Step {
 	var steps []Step
-	// Split the string by newlines and then parse each individual step
-	for _, stepYaml := range strings.Split(stepsYaml, "\n- ") {
-		if stepYaml == "" {
-			continue
-		}
+	// Remove any leading/trailing whitespace
+	stepsYaml = strings.TrimSpace(stepsYaml)
 
-		// Prepend the dash to each step to maintain valid YAML formatting
-		stepYaml = "- " + stepYaml
-		var step Step
-		if err := yaml.Unmarshal([]byte(stepYaml), &step); err == nil {
-			steps = append(steps, step)
-		}
+	// Ensure stepsYaml starts with '- '
+	if !strings.HasPrefix(stepsYaml, "- ") {
+		stepsYaml = "- " + stepsYaml
 	}
+
+	// Parse the stepsYaml into the steps slice
+	if err := yaml.Unmarshal([]byte(stepsYaml), &steps); err != nil {
+		fmt.Printf("Error parsing steps: %v\n", err)
+		return nil
+	}
+
 	return steps
 }
 
-/* func buildWf(actionName string, schedule []string, jobs []string  ) *Workflow{
-	sdcheudle_type := scheduel[0]
-	cron_schedule :=nil
-	if len(schedule)>1:
-		cron_schedule = schedule[1]
-	for job in jobs:
-
-
- }
-*/
 // Generates YAML from a Workflow struct and writes it to a file
 func (wf *Workflow) GenerateYAML(filename string, overwrite bool) error {
 	dirPath := ".github/workflows"
@@ -65,8 +56,10 @@ func (wf *Workflow) GenerateYAML(filename string, overwrite bool) error {
 		}
 	}
 
-	// Check if file exists in the directory and handle overwrite flag
+	// Construct the file path
 	filePath := filepath.Join(dirPath, filename)
+
+	// Check if file exists in the directory and handle overwrite flag
 	if exists, _ := pathExists(filePath); exists && !overwrite {
 		return fmt.Errorf("file '%s' already exists and overwrite is set to false; aborting", filename)
 	}
@@ -77,10 +70,10 @@ func (wf *Workflow) GenerateYAML(filename string, overwrite bool) error {
 		return fmt.Errorf("error marshaling YAML: %v", err)
 	}
 
-	// Replace `"on":` with `on:`
+	// Replace `"on":` with `on:` (YAML syntax)
 	yamlString := strings.Replace(string(data), `"on":`, "on:", 1)
 
-	// Write the corrected YAML data to the file
+	// Write the YAML data to the file
 	if err := os.WriteFile(filePath, []byte(yamlString), 0644); err != nil {
 		return fmt.Errorf("error writing YAML file: %v", err)
 	}
