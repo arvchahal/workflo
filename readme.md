@@ -1,18 +1,62 @@
-## workflo
-### Tired of writing GitHub Actions manually?
+### Using Workflo
 
-### Workflo is a powerful CLI tool built with the Bubble Tea framework by Charmbracelet. This Go-based CLI simplifies the creation of GitHub Action files by automatically generating them with essential boilerplate actions.
+To get started with Workflo:
 
-## Features
+1. **Download or Clone the CLI**  
+   Clone the repository from GitHub or download the CLI binary.
 
-- Generate GitHub Actions workflows with ease
-- Predefined boilerplate actions
-- Customizable templates
-- Simple and intuitive CLI
-- Language support: Go, Python, Node
-- Allows you to configure cloud credentials for AWS, Azure, and GCP
-- Configure GitHub secrets from the CLI
-- Autoinitialize a .github/workflows directory if it is not already there
-- Coming Soon:
-    - More language support
-    - Test your action before it goes live on GitHub.
+   ```bash
+   git clone <repo_url>
+   cd <repo_directory>
+   ```
+
+2. **Run the CLI**  
+   Use `go run` to execute the CLI:
+
+   ```bash
+   go run main.go
+   ```
+
+   You can also build an executable using `go build` for easier reuse:
+
+   ```bash
+   go build -o workflo
+   ./workflo
+   ```
+
+### Why Use Workflo?
+
+#### **Tired of writing GitHub Actions manually?**  
+Workflo simplifies your workflow automation process by generating ready-to-use GitHub Action YAML files with just a few commands. 
+
+---
+
+### **Features**
+
+- **Generate GitHub Actions effortlessly**  
+  Generate boilerplate YAML files for GitHub Actions with predefined workflows.
+
+- **Customizable templates**  
+  Tailor workflows for your specific project needs.
+
+- **Language support**  
+  Start with Go, Python, or Node.js configurations.
+
+- **Cloud Integration**  
+  Seamlessly configure cloud credentials for AWS, Azure, and GCP.
+
+- **Secrets Management**  
+  Set GitHub secrets directly from the CLI.
+
+- **Auto-setup for `.github/workflows`**  
+  Automatically initialize the required directory structure.
+
+---
+
+### **Coming Soon**
+- **Expanded language support**  
+  More languages for broader compatibility.
+- **Testing GitHub Actions**  
+  Preview and test workflows before deploying to GitHub.
+
+Get started with **Workflo** and automate your GitHub Action creation like a pro!
