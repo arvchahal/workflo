@@ -6,8 +6,8 @@ To get started with Workflo:
    Clone the repository from GitHub or download the CLI binary.
 
    ```bash
-   git clone <repo_url>
-   cd <repo_directory>
+   git clone https://github.com/arvchahal/workflo.git
+   cd cli
    ```
 
 2. **Run the CLI**  
