@@ -7,7 +7,7 @@ To get started with Workflo:
 
    ```bash
    git clone https://github.com/arvchahal/workflo.git
-   cd cli
+   cd workflo/cli
    ```
 
 2. **Run the CLI**  
