@@ -71,7 +71,7 @@ This file defines the application's data model, including the possible states an
 
 ---
 
-### 2. `init.go`
+### 2. `init.go`     
 
 This file initializes the model and sets up any initial components, such as text inputs or lists.
 
